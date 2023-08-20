@@ -2,4 +2,4 @@
 target
 out
 *.iml
-resourses
+src/main/resources
