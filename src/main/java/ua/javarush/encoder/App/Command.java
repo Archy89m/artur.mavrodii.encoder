@@ -1,4 +1,4 @@
-package ua.javarush.encoder.Runner;
+package ua.javarush.encoder.App;
 
 public enum Command {
     ENCRYPT,
