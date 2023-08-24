@@ -15,7 +15,7 @@ public class FileService {
         if (Files.exists(path)) {
             return path;
         } else {
-            throw new RuntimeException("File " + path + " not found. Try again.");
+            throw new RuntimeException("File " + path + " not found. Please try again.");
         }
     }
     public static List<String> reading(Path path) {
@@ -35,7 +35,6 @@ public class FileService {
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
-
     }
     public static Path getPathForCreatingFile(Path path, Command command) {
 
