@@ -1,4 +1,4 @@
-package ua.javarush.encoder.App;
+package ua.javarush.encoder.application;
 
 public class Application {
 
