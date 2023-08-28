@@ -21,29 +21,23 @@ public class CLI {
 
     public void StartWorkingWithFile(Application crypto) {
 
-        System.out.println("Start reading file...");
-        System.out.println("................");
-
         FileService fileService = new FileService();
         List<String> allLines = fileService.reading(crypto.getFilePath());
-        for (String line:allLines)
-            System.out.println(line);
-        System.out.println("................");
 
         chooseAlphabet(crypto);
-        System.out.println("Language was chosen - " + crypto.getAlphabet());
-        System.out.println("................");
 
-        System.out.println("Start " + crypto.getCommand() + " with key " + crypto.getKey());
-        System.out.println("................");
+        System.out.println("Start " + crypto.getCommand());
 
         CaesarCipher caesarCipher = new CaesarCipher();
-        List<String> cryptoLines = caesarCipher.cryptoOperation(allLines, crypto);
-        for (String line:cryptoLines)
-            System.out.println(line);
-        System.out.println("................");
-        String newPartFileName = "[" + crypto.getCommand() + "].";
-        fileService.writeFile(crypto.getFilePath(), newPartFileName, cryptoLines);
+        if (crypto.getCommand() == Command.BRUTE_FORCE) {
+            int key = caesarCipher.cryptoFindKey(allLines, crypto);
+            System.out.println("Key found: " + key);
+        } else {
+            List<String> cryptoLines = caesarCipher.cryptoOperation(allLines, crypto);
+
+            String newPartFileName = "[" + crypto.getCommand() + "].";
+            fileService.writeFile(crypto.getFilePath(), newPartFileName, cryptoLines);
+        }
     }
 
     private void chooseMode(Application crypto) {
@@ -92,9 +86,8 @@ public class CLI {
                 crypto.setCommand(Command.DECRYPT);
                 break;
             } else if (mode == 3) {
-                //Application.setCommand(Command.BRUTE_FORCE);
-                //break;
-                System.out.println("Command BRUTE_FORCE is still in development, please choose another command");
+                crypto.setCommand(Command.BRUTE_FORCE);
+                break;
             } else if (mode == 4){
                 System.out.println("Bye, see you next time :)");
                 System.exit(0);
@@ -113,9 +106,8 @@ public class CLI {
                 crypto.setCommand(Command.DECRYPT);
                 System.out.println("Your command - " + Command.DECRYPT);
             } else if (args[0].equals("BRUTE_FORCE")) {
-                System.out.println("Command BRUTE_FORCE is still in development, please choose another command");
-                System.exit(0);
-                //Application.setCommand(Command.BRUTE_FORCE);
+                crypto.setCommand(Command.BRUTE_FORCE);
+                System.out.println("Your command - " + Command.BRUTE_FORCE);
             } else {
                 System.out.println("Unknown command argument, please try again");
             }
@@ -143,6 +135,9 @@ public class CLI {
     }
 
     private static void chooseKey(Application crypto, String[] args) {
+
+        if (crypto.getCommand() == Command.BRUTE_FORCE)
+            return;
 
         if (crypto.getMode() == Mode.CLI) {
             System.out.println("Write integer key");
