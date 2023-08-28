@@ -140,9 +140,18 @@ public class CaesarCipher {
 
     private boolean tryToChooseKey(List<String> fromList, int keyAttempt) {
 
+        Command command;
+
         Application cryptoBruceForce = new Application();
 
-        cryptoBruceForce.setCommand((keyAttempt) >= 0 ? Command.DECRYPT : Command.ENCRYPT);
+        if (keyAttempt >= 0) {
+            command = Command.DECRYPT;
+        } else {
+            command = Command.ENCRYPT;
+            keyAttempt = -keyAttempt;
+        }
+
+        cryptoBruceForce.setCommand(command);
         cryptoBruceForce.setAlphabet(EnglishAlphabet.getInstance());
         cryptoBruceForce.setKey(keyAttempt);
 
