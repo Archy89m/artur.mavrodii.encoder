@@ -1,6 +1,6 @@
 package ua.javarush.encoder;
 
-import ua.javarush.encoder.alphabet.EnglishAlphabet;
+import ua.javarush.encoder.alphabet.AlphabetUtil;
 import ua.javarush.encoder.application.Application;
 import ua.javarush.encoder.application.Command;
 import ua.javarush.encoder.application.Mode;
@@ -23,43 +23,36 @@ public class CLI {
 
         FileService fileService = new FileService();
         List<String> allLines = fileService.reading(crypto.getFilePath());
+        List<String> cryptoLines;
+        String newPartFileName;
 
-        chooseAlphabet(crypto);
-
-        System.out.println("Start " + crypto.getCommand());
+        chooseAlphabet(crypto, allLines.get(0));
 
         CaesarCipher caesarCipher = new CaesarCipher();
         if (crypto.getCommand() == Command.BRUTE_FORCE) {
             int key = caesarCipher.cryptoFindKey(allLines, crypto);
-            System.out.println("Key found: " + key);
+            newPartFileName = "(B key-" + key + ").";
+            crypto.setCommand(Command.DECRYPT);
+            crypto.setKey(key);
         } else {
-            List<String> cryptoLines = caesarCipher.cryptoOperation(allLines, crypto);
-
-            String newPartFileName = "[" + crypto.getCommand() + "].";
-            fileService.writeFile(crypto.getFilePath(), newPartFileName, cryptoLines);
+            newPartFileName = "[" + crypto.getCommand() + "].";
         }
+        cryptoLines = caesarCipher.cryptoOperation(allLines, crypto);
+        fileService.writeFile(crypto.getFilePath(), newPartFileName, cryptoLines);
     }
 
     private void chooseMode(Application crypto) {
 
-        System.out.println("Chose app mode, 1 - CLI, 2 - Arguments, 3 - Exit:");
+        System.out.println("Chose app mode, 1 - CLI, 2 - Arguments");
         Scanner scanner = new Scanner(System.in);
-        while (scanner.hasNext()) {
-            if (!scanner.hasNextInt())
-                System.out.println("Choose integer");
-            int mode = scanner.nextInt();
-            if (mode == 1) {
-                crypto.setMode(Mode.CLI);
-                break;
-            } else if (mode == 2) {
-                crypto.setMode(Mode.ARGS);
-                break;
-            } else if (mode == 3){
-                System.out.println("Bye, see you next time :)");
-                System.exit(0);
-            }
+        int mode = scanner.nextInt();
+        if (mode == 1) {
+            crypto.setMode(Mode.CLI);
+        } else if (mode == 2) {
+            crypto.setMode(Mode.ARGS);
+        } else {
+            throw new RuntimeException("Wrong number, see you next time :)");
         }
-        System.out.println("Your mode: " + crypto.getMode());
     }
 
     private void chooseCommand(Application crypto, String[] args) {
@@ -73,43 +66,28 @@ public class CLI {
 
     private void chooseCommandCLI(Application crypto) {
 
-        System.out.println("Chose command, 1 - ENCRYPT, 2 - DECRYPT, 3 - BRUTE_FORCE, 4 - Exit:");
+        System.out.println("Chose command, 1 - ENCRYPT, 2 - DECRYPT, 3 - BRUTE_FORCE");
         Scanner scanner = new Scanner(System.in);
-        while (scanner.hasNext()) {
-            if (!scanner.hasNextInt())
-                System.out.println("Choose integer");
-            int mode = scanner.nextInt();
-            if (mode == 1) {
-                crypto.setCommand(Command.ENCRYPT);
-                break;
-            } else if (mode == 2) {
-                crypto.setCommand(Command.DECRYPT);
-                break;
-            } else if (mode == 3) {
-                crypto.setCommand(Command.BRUTE_FORCE);
-                break;
-            } else if (mode == 4){
-                System.out.println("Bye, see you next time :)");
-                System.exit(0);
-            }
+        int mode = scanner.nextInt();
+        if (mode == 1) {
+            crypto.setCommand(Command.ENCRYPT);
+        } else if (mode == 2) {
+            crypto.setCommand(Command.DECRYPT);
+        } else if (mode == 3) {
+            crypto.setCommand(Command.BRUTE_FORCE);
+        } else {
+            throw new RuntimeException("Wrong number, bye, see you next time :)");
         }
-        System.out.println("Your command: " + crypto.getCommand());
     }
 
     private static void commandARGS(Application crypto, String[] args) {
 
         try {
-            if (args[0].equals("ENCRYPT")) {
-                crypto.setCommand(Command.ENCRYPT);
-                System.out.println("Your command - " + Command.ENCRYPT);
-            } else if (args[0].equals("DECRYPT")) {
-                crypto.setCommand(Command.DECRYPT);
-                System.out.println("Your command - " + Command.DECRYPT);
-            } else if (args[0].equals("BRUTE_FORCE")) {
-                crypto.setCommand(Command.BRUTE_FORCE);
-                System.out.println("Your command - " + Command.BRUTE_FORCE);
-            } else {
-                System.out.println("Unknown command argument, please try again");
+            switch (args[0]) {
+                case "ENCRYPT" -> crypto.setCommand(Command.ENCRYPT);
+                case "DECRYPT" -> crypto.setCommand(Command.DECRYPT);
+                case "BRUTE_FORCE" -> crypto.setCommand(Command.BRUTE_FORCE);
+                default -> throw new RuntimeException("Unknown command argument, please try again");
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println(e.getMessage());
@@ -156,10 +134,9 @@ public class CLI {
                 System.out.println(e.getMessage());
             }
         }
-        System.out.println("Key - " + crypto.getKey());
     }
 
-    private static void chooseAlphabet(Application crypto) {
-        crypto.setAlphabet(EnglishAlphabet.getInstance());
+    private static void chooseAlphabet(Application crypto, String line) {
+        crypto.setAlphabet(new AlphabetUtil().detectLanguage(line));
     }
 }

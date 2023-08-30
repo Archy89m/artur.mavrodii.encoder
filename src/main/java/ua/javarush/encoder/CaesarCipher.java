@@ -1,24 +1,28 @@
 package ua.javarush.encoder;
 
-import ua.javarush.encoder.alphabet.EnglishAlphabet;
+import ua.javarush.encoder.alphabet.Alphabet;
 import ua.javarush.encoder.application.Application;
 import ua.javarush.encoder.application.Command;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.stream.Collectors;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CaesarCipher {
 
     public List<String> cryptoOperation(List<String> fromList, Application crypto) {
 
         List<String> toList = new ArrayList<>();
-
         List<Character> listAlphabet = crypto.getAlphabet().getListAlphabet();
+
         for (String line : fromList) {
-            String cryptoLine = "";
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < line.length(); i++) {
 
-                Boolean upperCase = Character.isUpperCase(line.charAt(i));
+                boolean upperCase = Character.isUpperCase(line.charAt(i));
 
                 char currentChar;
                 if (upperCase) {
@@ -32,9 +36,9 @@ public class CaesarCipher {
                 if (upperCase)
                     cryptoChar = Character.toUpperCase(cryptoChar);
 
-                cryptoLine = cryptoLine + cryptoChar;
+                sb.append(cryptoChar);
             }
-            toList.add(cryptoLine);
+            toList.add(sb.toString());
         }
         return toList;
     }
@@ -54,7 +58,7 @@ public class CaesarCipher {
 
     private char cryptoChange(char current, List<Character> listAlphabet, Application crypto) {
 
-        Integer currentNumber = listAlphabet.indexOf(current);
+        int currentNumber = listAlphabet.indexOf(current);
         if (currentNumber == -1)
             return current;
         int cryptoNumber = getCryptoShift(crypto, currentNumber, listAlphabet.size());
@@ -124,9 +128,9 @@ public class CaesarCipher {
             int positionAlphabet = listAlphabet.indexOf(charFrequencyAlphabet);
             int positionText = listAlphabet.indexOf(charFrequencyText);
 
-            foundKey = Integer.valueOf(positionText - positionAlphabet);
+            foundKey = positionText - positionAlphabet;
 
-            keyChosen = tryToChooseKey(fromList, foundKey);
+            keyChosen = tryToChooseKey(fromList, foundKey, crypto.getAlphabet());
             if (keyChosen)
                 break;
         }
@@ -138,10 +142,9 @@ public class CaesarCipher {
         }
     }
 
-    private boolean tryToChooseKey(List<String> fromList, int keyAttempt) {
+    private boolean tryToChooseKey(List<String> fromList, int keyAttempt, Alphabet alphabet) {
 
         Command command;
-
         Application cryptoBruceForce = new Application();
 
         if (keyAttempt >= 0) {
@@ -152,22 +155,17 @@ public class CaesarCipher {
         }
 
         cryptoBruceForce.setCommand(command);
-        cryptoBruceForce.setAlphabet(EnglishAlphabet.getInstance());
+        cryptoBruceForce.setAlphabet(alphabet);
         cryptoBruceForce.setKey(keyAttempt);
 
         List<String> cryptoTestList = cryptoOperation(fromList, cryptoBruceForce);
 
-        System.out.println("Try to read text:");
-        System.out.println(cryptoTestList.get(0).toString());
-        System.out.println("Does it look like correct? Please, choose, 1 - \"Yes\", Any other character - \"No\"" );
+        System.out.println(cryptoTestList.get(0));
+        System.out.println("Does it look like correct? Please, choose, 1 - \"Yes\", any other character - \"No\"");
         Scanner scanner = new Scanner(System.in);
         int result = scanner.nextInt();
 
-        if (result == 1) {
-            return true;
-        } else {
-            return false;
-        }
+        return result == 1;
     }
 
     private List<Character> getFrequencyListFromText(List<String> fromList, List<Character> listAlphabet) {
@@ -176,7 +174,7 @@ public class CaesarCipher {
 
         for (String line : fromList) {
             for (char c : line.toCharArray()) {
-                if (listAlphabet.indexOf(c) == -1)
+                if (!listAlphabet.contains(c))
                     continue;
                 char lowerC = Character.toLowerCase(c);
                 if (frequencyMap.containsKey(lowerC)) {
@@ -187,12 +185,10 @@ public class CaesarCipher {
             }
         }
 
-        List<Character> FrequencyListFromText = frequencyMap.entrySet()
+        return frequencyMap.entrySet()
                 .stream()
                 .sorted(Map.Entry.<Character, Integer>comparingByValue().reversed())
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-
-        return FrequencyListFromText;
     }
 }

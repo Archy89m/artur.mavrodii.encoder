@@ -17,11 +17,11 @@ public class FileService {
             throw new RuntimeException("File " + path + " not found. Please try again.");
         }
     }
+
     public List<String> reading(Path path) {
 
         try {
-            List<String> allLines = Files.readAllLines(path);
-            return allLines;
+            return Files.readAllLines(path);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -37,11 +37,12 @@ public class FileService {
             throw new RuntimeException(e.getMessage());
         }
     }
+
     public Path getPathForCreatingFile(Path path, String newPartFileName) {
 
         Path originalFileName = path.getFileName();
 
-        String[] nameAndExtension = originalFileName.toString().split("\\.(?=[^\\.]+$)");
+        String[] nameAndExtension = originalFileName.toString().split("\\.(?=[^.]+$)");
 
         String newFileName = nameAndExtension[0] + newPartFileName + nameAndExtension[1];
 
