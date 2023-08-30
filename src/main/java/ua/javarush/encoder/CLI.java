@@ -1,9 +1,11 @@
 package ua.javarush.encoder;
 
 import ua.javarush.encoder.alphabet.AlphabetUtil;
-import ua.javarush.encoder.application.Application;
-import ua.javarush.encoder.application.Command;
-import ua.javarush.encoder.application.Mode;
+import ua.javarush.encoder.cipher.CaesarCipher;
+import ua.javarush.encoder.io.FileService;
+import ua.javarush.encoder.setting.Command;
+import ua.javarush.encoder.setting.Config;
+import ua.javarush.encoder.setting.Mode;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -11,82 +13,82 @@ import java.util.Scanner;
 
 public class CLI {
 
-    public void StartApp(Application crypto, String[] args) {
+    public void StartApp(Config config, String[] args) {
 
-        chooseMode(crypto);
-        chooseCommand(crypto, args);
-        chooseFile(crypto, args);
-        chooseKey(crypto, args);
+        chooseMode(config);
+        chooseCommand(config, args);
+        chooseFile(config, args);
+        chooseKey(config, args);
     }
 
-    public void StartWorkingWithFile(Application crypto) {
+    public void StartWorkingWithFile(Config config) {
 
         FileService fileService = new FileService();
-        List<String> allLines = fileService.reading(crypto.getFilePath());
+        List<String> allLines = fileService.reading(config.getFilePath());
         List<String> cryptoLines;
         String newPartFileName;
 
-        chooseAlphabet(crypto, allLines.get(0));
+        chooseAlphabet(config, allLines.get(0));
 
         CaesarCipher caesarCipher = new CaesarCipher();
-        if (crypto.getCommand() == Command.BRUTE_FORCE) {
-            int key = caesarCipher.cryptoFindKey(allLines, crypto);
+        if (config.getCommand() == Command.BRUTE_FORCE) {
+            int key = caesarCipher.cryptoFindKey(allLines, config);
             newPartFileName = "(B key-" + key + ").";
-            crypto.setCommand(Command.DECRYPT);
-            crypto.setKey(key);
+            config.setCommand(Command.DECRYPT);
+            config.setKey(key);
         } else {
-            newPartFileName = "[" + crypto.getCommand() + "].";
+            newPartFileName = "[" + config.getCommand() + "].";
         }
-        cryptoLines = caesarCipher.cryptoOperation(allLines, crypto);
-        fileService.writeFile(crypto.getFilePath(), newPartFileName, cryptoLines);
+        cryptoLines = caesarCipher.cryptoOperate(allLines, config);
+        fileService.writeFile(config.getFilePath(), newPartFileName, cryptoLines);
     }
 
-    private void chooseMode(Application crypto) {
+    private void chooseMode(Config config) {
 
         System.out.println("Chose app mode, 1 - CLI, 2 - Arguments");
         Scanner scanner = new Scanner(System.in);
         int mode = scanner.nextInt();
         if (mode == 1) {
-            crypto.setMode(Mode.CLI);
+            config.setMode(Mode.CLI);
         } else if (mode == 2) {
-            crypto.setMode(Mode.ARGS);
+            config.setMode(Mode.ARGS);
         } else {
             throw new RuntimeException("Wrong number, see you next time :)");
         }
     }
 
-    private void chooseCommand(Application crypto, String[] args) {
+    private void chooseCommand(Config config, String[] args) {
 
-        if (crypto.getMode() == Mode.CLI){
-            chooseCommandCLI(crypto);
-        } else if (crypto.getMode() == Mode.ARGS) {
-            commandARGS(crypto, args);
+        if (config.getMode() == Mode.CLI){
+            chooseCommandCLI(config);
+        } else if (config.getMode() == Mode.ARGS) {
+            commandARGS(config, args);
         }
     }
 
-    private void chooseCommandCLI(Application crypto) {
+    private void chooseCommandCLI(Config config) {
 
         System.out.println("Chose command, 1 - ENCRYPT, 2 - DECRYPT, 3 - BRUTE_FORCE");
         Scanner scanner = new Scanner(System.in);
         int mode = scanner.nextInt();
         if (mode == 1) {
-            crypto.setCommand(Command.ENCRYPT);
+            config.setCommand(Command.ENCRYPT);
         } else if (mode == 2) {
-            crypto.setCommand(Command.DECRYPT);
+            config.setCommand(Command.DECRYPT);
         } else if (mode == 3) {
-            crypto.setCommand(Command.BRUTE_FORCE);
+            config.setCommand(Command.BRUTE_FORCE);
         } else {
             throw new RuntimeException("Wrong number, bye, see you next time :)");
         }
     }
 
-    private static void commandARGS(Application crypto, String[] args) {
+    private static void commandARGS(Config config, String[] args) {
 
         try {
             switch (args[0]) {
-                case "ENCRYPT" -> crypto.setCommand(Command.ENCRYPT);
-                case "DECRYPT" -> crypto.setCommand(Command.DECRYPT);
-                case "BRUTE_FORCE" -> crypto.setCommand(Command.BRUTE_FORCE);
+                case "ENCRYPT" -> config.setCommand(Command.ENCRYPT);
+                case "DECRYPT" -> config.setCommand(Command.DECRYPT);
+                case "BRUTE_FORCE" -> config.setCommand(Command.BRUTE_FORCE);
                 default -> throw new RuntimeException("Unknown command argument, please try again");
             }
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -94,49 +96,49 @@ public class CLI {
         }
     }
 
-    private static void chooseFile(Application crypto, String[] args) {
+    private static void chooseFile(Config config, String[] args) {
 
         FileService fileService = new FileService();
 
-        if (crypto.getMode() == Mode.CLI) {
+        if (config.getMode() == Mode.CLI) {
             System.out.println("Write file name");
             Path path = fileService.getFilePath(new Scanner(System.in).nextLine());
-            crypto.setFilePath(path);
-        } else if (crypto.getMode() == Mode.ARGS) {
+            config.setFilePath(path);
+        } else if (config.getMode() == Mode.ARGS) {
             try {
                 Path path = fileService.getFilePath(args[1]);
-                crypto.setFilePath(path);
+                config.setFilePath(path);
             } catch (IndexOutOfBoundsException e) {
                 System.out.println(e.getMessage());
             }
         }
     }
 
-    private static void chooseKey(Application crypto, String[] args) {
+    private static void chooseKey(Config config, String[] args) {
 
-        if (crypto.getCommand() == Command.BRUTE_FORCE)
+        if (config.getCommand() == Command.BRUTE_FORCE)
             return;
 
-        if (crypto.getMode() == Mode.CLI) {
+        if (config.getMode() == Mode.CLI) {
             System.out.println("Write integer key");
             String keyString = new Scanner(System.in).nextLine();
             try {
-                crypto.setKey(Integer.parseInt(keyString));
+                config.setKey(Integer.parseInt(keyString));
             } catch (NumberFormatException e) {
                 System.out.println(e.getMessage());
                 throw new RuntimeException("Invalid key format");
             }
-        } else if (crypto.getMode() == Mode.ARGS) {
+        } else if (config.getMode() == Mode.ARGS) {
             try {
                 String keyString = args[2];
-                crypto.setKey(Integer.parseInt(keyString));
+                config.setKey(Integer.parseInt(keyString));
             } catch (IndexOutOfBoundsException | NumberFormatException e) {
                 System.out.println(e.getMessage());
             }
         }
     }
 
-    private static void chooseAlphabet(Application crypto, String line) {
-        crypto.setAlphabet(new AlphabetUtil().detectLanguage(line));
+    private static void chooseAlphabet(Config config, String line) {
+        config.setAlphabet(new AlphabetUtil().detectLanguage(line));
     }
 }

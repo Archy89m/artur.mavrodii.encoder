@@ -1,8 +1,8 @@
-package ua.javarush.encoder;
+package ua.javarush.encoder.cipher;
 
 import ua.javarush.encoder.alphabet.Alphabet;
-import ua.javarush.encoder.application.Application;
-import ua.javarush.encoder.application.Command;
+import ua.javarush.encoder.setting.Command;
+import ua.javarush.encoder.setting.Config;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -13,10 +13,10 @@ import java.util.Map;
 
 public class CaesarCipher {
 
-    public List<String> cryptoOperation(List<String> fromList, Application crypto) {
+    public List<String> cryptoOperate(List<String> fromList, Config config) {
 
         List<String> toList = new ArrayList<>();
-        List<Character> listAlphabet = crypto.getAlphabet().getListAlphabet();
+        List<Character> listAlphabet = config.getAlphabet().getListAlphabet();
 
         for (String line : fromList) {
             StringBuilder sb = new StringBuilder();
@@ -31,7 +31,7 @@ public class CaesarCipher {
                     currentChar = line.charAt(i);
                 }
 
-                char cryptoChar = cryptoChange(currentChar, listAlphabet, crypto);
+                char cryptoChar = cryptoChange(currentChar, listAlphabet, config);
 
                 if (upperCase)
                     cryptoChar = Character.toUpperCase(cryptoChar);
@@ -43,47 +43,57 @@ public class CaesarCipher {
         return toList;
     }
 
-    public int cryptoFindKey(List<String> fromList, Application crypto) {
+    public int cryptoFindKey(List<String> fromList, Config config) {
 
         Integer key = 0;
         for (int numberAttemptAlphabet = 0; numberAttemptAlphabet < 3; numberAttemptAlphabet++) {
-            key = findKeyAttempt(fromList, crypto, numberAttemptAlphabet);
+            key = findKeyAttempt(fromList, config, numberAttemptAlphabet);
             if (key != null)
                 break;
         }
         if (key == null)
-            throw new RuntimeException("Key is not found. Please try to use bigger text");
+            throw new KeyNotFoundRuntimeException("Key is not found. Please try to use bigger text");
         return key;
     }
 
-    private char cryptoChange(char current, List<Character> listAlphabet, Application crypto) {
+    private char cryptoChange(char current, List<Character> listAlphabet, Config config) {
 
         int currentNumber = listAlphabet.indexOf(current);
         if (currentNumber == -1)
             return current;
-        int cryptoNumber = getCryptoShift(crypto, currentNumber, listAlphabet.size());
+        int cryptoNumber = getCryptoShift(config, currentNumber, listAlphabet.size());
 
         return listAlphabet.get(cryptoNumber);
     }
 
-    private int getCryptoShift(Application crypto, int currentNumber, int lengthAlphabet) {
+    private int getCryptoShift(Config config, int currentNumber, int lengthAlphabet) {
 
-        int key = crypto.getKey();
+        int key = config.getKey();
 
-        if (crypto.getCommand() == Command.ENCRYPT) {
-            if (key >= 0) {
-                return getCryptoShiftEncrypt(currentNumber, key, lengthAlphabet);
-            } else {
-                return getCryptoShiftDecrypt(currentNumber, -key, lengthAlphabet);
-            }
-        } else if (crypto.getCommand() == Command.DECRYPT) {
-            if (key >= 0) {
-                return getCryptoShiftDecrypt(currentNumber, key, lengthAlphabet);
-            } else {
-                return getCryptoShiftEncrypt(currentNumber, -key, lengthAlphabet);
-            }
+        if (config.getCommand() == Command.ENCRYPT) {
+            return getCryptoShiftKeyEncrypt(currentNumber, key, lengthAlphabet);
+        } else if (config.getCommand() == Command.DECRYPT) {
+            return getCryptoShiftKeyDecrypt(currentNumber, key, lengthAlphabet);
         } else {
             return currentNumber;
+        }
+    }
+
+    private int getCryptoShiftKeyEncrypt(int currentNumber, int key, int lengthAlphabet) {
+
+        if (key >= 0) {
+            return getCryptoShiftEncrypt(currentNumber, key, lengthAlphabet);
+        } else {
+            return getCryptoShiftDecrypt(currentNumber, -key, lengthAlphabet);
+        }
+    }
+
+    private int getCryptoShiftKeyDecrypt(int currentNumber, int key, int lengthAlphabet) {
+
+        if (key >= 0) {
+            return getCryptoShiftDecrypt(currentNumber, key, lengthAlphabet);
+        } else {
+            return getCryptoShiftEncrypt(currentNumber, -key, lengthAlphabet);
         }
     }
 
@@ -111,10 +121,10 @@ public class CaesarCipher {
         }
     }
 
-    private Integer findKeyAttempt(List<String> fromList, Application crypto, int numberAttemptAlphabet) {
+    private Integer findKeyAttempt(List<String> fromList, Config config, int numberAttemptAlphabet) {
 
-        List<Character> listAlphabet = crypto.getAlphabet().getListAlphabet();
-        List<Character> listFrequencyAlphabet = crypto.getAlphabet().getListFrequencyAlphabet();
+        List<Character> listAlphabet = config.getAlphabet().getListAlphabet();
+        List<Character> listFrequencyAlphabet = config.getAlphabet().getListFrequencyAlphabet();
         List<Character> listFrequencyFromText = getFrequencyListFromText(fromList, listAlphabet);
 
         boolean keyChosen = false;
@@ -130,7 +140,7 @@ public class CaesarCipher {
 
             foundKey = positionText - positionAlphabet;
 
-            keyChosen = tryToChooseKey(fromList, foundKey, crypto.getAlphabet());
+            keyChosen = tryToChooseKey(fromList, foundKey, config.getAlphabet());
             if (keyChosen)
                 break;
         }
@@ -145,7 +155,7 @@ public class CaesarCipher {
     private boolean tryToChooseKey(List<String> fromList, int keyAttempt, Alphabet alphabet) {
 
         Command command;
-        Application cryptoBruceForce = new Application();
+        Config configBruceForce = new Config();
 
         if (keyAttempt >= 0) {
             command = Command.DECRYPT;
@@ -154,11 +164,11 @@ public class CaesarCipher {
             keyAttempt = -keyAttempt;
         }
 
-        cryptoBruceForce.setCommand(command);
-        cryptoBruceForce.setAlphabet(alphabet);
-        cryptoBruceForce.setKey(keyAttempt);
+        configBruceForce.setCommand(command);
+        configBruceForce.setAlphabet(alphabet);
+        configBruceForce.setKey(keyAttempt);
 
-        List<String> cryptoTestList = cryptoOperation(fromList, cryptoBruceForce);
+        List<String> cryptoTestList = cryptoOperate(fromList, configBruceForce);
 
         System.out.println(cryptoTestList.get(0));
         System.out.println("Does it look like correct? Please, choose, 1 - \"Yes\", any other character - \"No\"");

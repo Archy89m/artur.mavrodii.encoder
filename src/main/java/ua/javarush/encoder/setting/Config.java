@@ -1,26 +1,16 @@
-package ua.javarush.encoder.application;
+package ua.javarush.encoder.setting;
 
 import ua.javarush.encoder.alphabet.Alphabet;
-import ua.javarush.encoder.CLI;
 
 import java.nio.file.Path;
 
-public class Application {
-
+public class Config {
     private Mode mode;
     private Command command;
     private Path filePath;
     private int key;
     private Alphabet alphabet;
 
-    public static void main(String[] args) {
-
-        Application crypto = new Application();
-
-        CLI cli = new CLI();
-        cli.StartApp(crypto, args);
-        cli.StartWorkingWithFile(crypto);
-    }
 
     public Mode getMode() {
         return this.mode;

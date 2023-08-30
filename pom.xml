@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>ua.javarush</groupId>
-  <artifactId>artur.mavrodii.encoder</artifactId>
+  <artifactId>encoder</artifactId>
   <url>http://maven.apache.org</url>
   <properties>
     <maven.compiler.source>18</maven.compiler.source>

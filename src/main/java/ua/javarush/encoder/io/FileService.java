@@ -1,4 +1,8 @@
-package ua.javarush.encoder;
+package ua.javarush.encoder.io;
+
+import ua.javarush.encoder.io.exception.FileNotFoundRuntimeException;
+import ua.javarush.encoder.io.exception.InputRuntimeException;
+import ua.javarush.encoder.io.exception.OutputRuntimeException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,7 +18,7 @@ public class FileService {
         if (Files.exists(path)) {
             return path;
         } else {
-            throw new RuntimeException("File " + path + " not found. Please try again.");
+            throw new FileNotFoundRuntimeException("File " + path + " not found. Please try again.");
         }
     }
 
@@ -23,7 +27,7 @@ public class FileService {
         try {
             return Files.readAllLines(path);
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new InputRuntimeException("File read error", e);
         }
     }
 
@@ -34,7 +38,7 @@ public class FileService {
             Files.write(newPath, lines, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             System.out.println("New file created: " + newPath);
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new OutputRuntimeException("File write error", e);
         }
     }
 
