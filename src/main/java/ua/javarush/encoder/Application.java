@@ -1,5 +1,6 @@
 package ua.javarush.encoder;
 
+import ua.javarush.encoder.interaction.CLI;
 import ua.javarush.encoder.setting.Config;
 
 

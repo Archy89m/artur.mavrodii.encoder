@@ -1,4 +1,4 @@
-package ua.javarush.encoder;
+package ua.javarush.encoder.interaction;
 
 import ua.javarush.encoder.alphabet.AlphabetUtil;
 import ua.javarush.encoder.cipher.CaesarCipher;
@@ -53,7 +53,7 @@ public class CLI {
         } else if (mode == 2) {
             config.setMode(Mode.ARGS);
         } else {
-            throw new RuntimeException("Wrong number, see you next time :)");
+            throw new WrongConfigRuntimeException("Unknown mode");
         }
     }
 
@@ -78,7 +78,7 @@ public class CLI {
         } else if (mode == 3) {
             config.setCommand(Command.BRUTE_FORCE);
         } else {
-            throw new RuntimeException("Wrong number, bye, see you next time :)");
+            throw new WrongConfigRuntimeException("Wrong command");
         }
     }
 
@@ -89,7 +89,7 @@ public class CLI {
                 case "ENCRYPT" -> config.setCommand(Command.ENCRYPT);
                 case "DECRYPT" -> config.setCommand(Command.DECRYPT);
                 case "BRUTE_FORCE" -> config.setCommand(Command.BRUTE_FORCE);
-                default -> throw new RuntimeException("Unknown command argument, please try again");
+                default -> throw new WrongConfigRuntimeException("Unknown command from argument");
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println(e.getMessage());
@@ -100,18 +100,14 @@ public class CLI {
 
         FileService fileService = new FileService();
 
+        Path path = null;
         if (config.getMode() == Mode.CLI) {
             System.out.println("Write file name");
-            Path path = fileService.getFilePath(new Scanner(System.in).nextLine());
-            config.setFilePath(path);
+            path = fileService.getFilePath(new Scanner(System.in).nextLine());
         } else if (config.getMode() == Mode.ARGS) {
-            try {
-                Path path = fileService.getFilePath(args[1]);
-                config.setFilePath(path);
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println(e.getMessage());
-            }
+            path = fileService.getFilePath(args[1]);
         }
+        config.setFilePath(path);
     }
 
     private static void chooseKey(Config config, String[] args) {
@@ -125,15 +121,14 @@ public class CLI {
             try {
                 config.setKey(Integer.parseInt(keyString));
             } catch (NumberFormatException e) {
-                System.out.println(e.getMessage());
-                throw new RuntimeException("Invalid key format");
+                throw new WrongConfigRuntimeException("Invalid key format", e);
             }
         } else if (config.getMode() == Mode.ARGS) {
             try {
                 String keyString = args[2];
                 config.setKey(Integer.parseInt(keyString));
             } catch (IndexOutOfBoundsException | NumberFormatException e) {
-                System.out.println(e.getMessage());
+                throw new WrongConfigRuntimeException("Wrong arguments", e);
             }
         }
     }
