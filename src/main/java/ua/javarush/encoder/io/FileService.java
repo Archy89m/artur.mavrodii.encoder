@@ -42,7 +42,7 @@ public class FileService {
         }
     }
 
-    public Path getPathForCreatingFile(Path path, String newPartFileName) {
+    Path getPathForCreatingFile(Path path, String newPartFileName) {
 
         Path originalFileName = path.getFileName();
 

@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 public class CLI {
 
-    public void StartApp(Config config, String[] args) {
+    public void startApp(Config config, String[] args) {
 
         chooseMode(config);
         chooseCommand(config, args);
@@ -21,7 +21,7 @@ public class CLI {
         chooseKey(config, args);
     }
 
-    public void StartWorkingWithFile(Config config) {
+    public void startWorkingWithFile(Config config) {
 
         FileService fileService = new FileService();
         List<String> allLines = fileService.reading(config.getFilePath());

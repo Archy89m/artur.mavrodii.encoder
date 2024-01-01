@@ -3,12 +3,12 @@ package ua.javarush.encoder.alphabet;
 import java.util.Arrays;
 import java.util.List;
 
-public class UkrainianAlphabet implements Alphabet{
+class UkrainianAlphabet implements Alphabet{
 
     private final List<Character> listAlphabet;
     private final List<Character> frequencyListAlphabet;
 
-    public UkrainianAlphabet() {
+    UkrainianAlphabet() {
 
         this.listAlphabet = getAlphabetList();
         this.frequencyListAlphabet = getFrequencyListAlphabet();

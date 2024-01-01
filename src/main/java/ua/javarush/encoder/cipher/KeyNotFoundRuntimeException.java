@@ -1,8 +1,8 @@
 package ua.javarush.encoder.cipher;
 
-public class KeyNotFoundRuntimeException extends RuntimeException {
+class KeyNotFoundRuntimeException extends RuntimeException {
 
-    public KeyNotFoundRuntimeException(String message) {
+    KeyNotFoundRuntimeException(String message) {
         super(message);
     }
 }

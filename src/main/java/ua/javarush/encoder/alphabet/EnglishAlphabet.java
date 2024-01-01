@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class EnglishAlphabet implements Alphabet {
+class EnglishAlphabet implements Alphabet {
 
     private final List<Character> listAlphabet;
     private final List<Character> frequencyListAlphabet;
 
-    public EnglishAlphabet() {
+    EnglishAlphabet() {
 
         this.listAlphabet = getAlphabetList();
         this.frequencyListAlphabet = getFrequencyListAlphabet();
